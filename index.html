@@ -154,7 +154,7 @@
   <img id="photoPreview" alt="撮影画像">
   
   <div id="buttonsContainer">
-	<a id="saveLink" download="photo.png"><button>保存</button></a>
+    <button id="saveButton">保存</button>
     <button id="discardButton">閉じる</button>
   </div>
 
@@ -198,6 +198,7 @@
     const termsModal = document.getElementById('termsModal');
     const showTerms = document.getElementById('showTerms');
     const hideTerms = document.getElementById('hideTerms');
+	const saveButton = document.getElementById('saveButton');
     const discardButton = document.getElementById('discardButton');
 
     let currentStream = null;
@@ -254,6 +255,13 @@
 
     hideTerms.addEventListener('click', () => {
       termsModal.style.display = 'none';
+    });
+
+    saveButton.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.href = photoPreview.src;
+      link.download = 'photo.png';
+      link.click();
     });
   </script>
 
