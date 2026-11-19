@@ -1,7 +1,7 @@
 {
-  "name": "Quiet Camera",
-  "short_name": "Quiet Camera",
-  "description": "写真と動画を端末内で処理する、プライバシー重視のカメラPWA。",
+  "name": "SilentCam",
+  "short_name": "SilentCam",
+  "description": "カメラのシャッター音が出ないサイト",
   "lang": "ja",
   "id": "./",
   "start_url": "./",
