@@ -213,7 +213,11 @@
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { exact: facingMode } },
+          video: {
+		    facingMode: { exact: facingMode },
+			width: { ideal: 3840 },
+            height: { ideal: 2160 }
+		  },
           audio: false
         });
         currentStream = stream;
