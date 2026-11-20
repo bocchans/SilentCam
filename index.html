@@ -255,14 +255,9 @@
     let videoTrack = null;
 
     async function startCamera(facingMode) {
-	  videoTrack = stream.getVideoTracks()[0];
-      const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
-      const settings = videoTrack.getSettings ? videoTrack.getSettings() : {};
-	
       if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
       }
-
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
@@ -274,6 +269,23 @@
         });
         currentStream = stream;
         video.srcObject = stream;
+
+		videoTrack = stream.getVideoTracks()[0];
+        const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+        const settings = videoTrack.getSettings ? videoTrack.getSettings() : {};
+
+		if ('zoom' in capabilities) {
+          zoomSlider.min = capabilities.zoom.min;
+          zoomSlider.max = capabilities.zoom.max;
+          zoomSlider.step = capabilities.zoom.step || 0.1;
+          
+          const initialZoom = settings.zoom || capabilities.zoom.min;
+          zoomSlider.value = initialZoom;
+          zoomValue.textContent = Number(initialZoom).toFixed(1) + 'x';
+          zoomContainer.style.display = 'flex';
+        } else {
+          zoomContainer.style.display = 'none';
+        }
       } catch (e) {
         alert("カメラが使えません: " + e.message);
       }
@@ -322,19 +334,6 @@
       link.download = 'photo.png';
       link.click();
     });
-
-	if ('zoom' in capabilities) {
-      zoomSlider.min = capabilities.zoom.min;
-      zoomSlider.max = capabilities.zoom.max;
-      zoomSlider.step = capabilities.zoom.step || 0.1;
-      
-      const initialZoom = settings.zoom || capabilities.zoom.min;
-      zoomSlider.value = initialZoom;
-      zoomValue.textContent = Number(initialZoom).toFixed(1) + 'x';
-      zoomContainer.style.display = 'flex';
-    } else {
-      zoomContainer.style.display = 'none';
-    }
 
     zoomSlider.addEventListener('input', async () => {
       if (!videoTrack) return;
