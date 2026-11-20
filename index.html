@@ -157,6 +157,35 @@
       }
     }
 
+	#zoomContainer {
+      position: absolute;
+      bottom: 85px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      max-width: 320px;
+      display: none; /* 非対応カメラでは隠す */
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 16px;
+      border-radius: 20px;
+      backdrop-filter: blur(6px);
+      z-index: 2;
+    }
+
+    #zoomSlider {
+      flex: 1;
+      accent-color: #fff;
+      cursor: pointer;
+    }
+
+    #zoomValue {
+      font-size: 14px;
+      min-width: 38px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
 <body>
@@ -168,6 +197,11 @@
   <div id="buttonsContainer">
     <button id="saveButton">保存</button>
     <button id="discardButton">閉じる</button>
+  </div>
+
+  <div id="zoomContainer">
+    <input type="range" id="zoomSlider">
+    <span id="zoomValue">1.0x</span>
   </div>
 
   <div id="controls">
@@ -215,7 +249,16 @@
 
     let currentStream = null;
 
+	const zoomContainer = document.getElementById('zoomContainer');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const zoomValue = document.getElementById('zoomValue');
+    let videoTrack = null;
+
     async function startCamera(facingMode) {
+	  videoTrack = stream.getVideoTracks()[0];
+      const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+      const settings = videoTrack.getSettings ? videoTrack.getSettings() : {};
+	
       if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
       }
@@ -279,7 +322,33 @@
       link.download = 'photo.png';
       link.click();
     });
-  </script>
 
+	if ('zoom' in capabilities) {
+      zoomSlider.min = capabilities.zoom.min;
+      zoomSlider.max = capabilities.zoom.max;
+      zoomSlider.step = capabilities.zoom.step || 0.1;
+      
+      const initialZoom = settings.zoom || capabilities.zoom.min;
+      zoomSlider.value = initialZoom;
+      zoomValue.textContent = Number(initialZoom).toFixed(1) + 'x';
+      zoomContainer.style.display = 'flex';
+    } else {
+      zoomContainer.style.display = 'none';
+    }
+
+    zoomSlider.addEventListener('input', async () => {
+      if (!videoTrack) return;
+      const zoomLevel = parseFloat(zoomSlider.value);
+      zoomValue.textContent = zoomLevel.toFixed(1) + 'x';
+
+      try {
+        await videoTrack.applyConstraints({
+          advanced: [{ zoom: zoomLevel }]
+        });
+      } catch (err) {
+        console.error('ズーム適用エラー:', err);
+      }
+    });
+  </script>
 </body>
 </html>
